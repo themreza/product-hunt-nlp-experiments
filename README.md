@@ -6,9 +6,9 @@ Natural Language Processing (NLP) experiments based on data from Product Hunt.
 ## Experiments
 
 - A model that suggests topics based on a description of the product
-- A model that comes up describes a product based on given topics
+- A model that describes a product based on given topics
 - A model that generates a tagline based on the product description
-- A model that creates a name for a product based on its description
+- A model that names a product based on its description
 
 ## Data collection
 
