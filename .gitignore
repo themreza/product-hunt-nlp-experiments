@@ -142,6 +142,10 @@ cython_debug/
 
 # Project files
 /config.conf
-/dataset/
+/dataset/**/*
+!/dataset/posts/
+!/dataset/posts/.gitkeep
+!/dataset/topics/
+!/dataset/topics/.gitkeep
 !/dataset/.gitkeep
 !/dataset/populate.py

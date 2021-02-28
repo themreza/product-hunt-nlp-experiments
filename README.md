@@ -1,6 +1,8 @@
 # Product Hunt NLP Experiments
 Natural Language Processing (NLP) experiments based on data from Product Hunt.
 
+![Product Hunt NLP Experiments](assets/logo-128.png)
+
 **Development status**: Data collection
 
 ## Experiments
@@ -28,7 +30,67 @@ the [API dashboard](https://api.producthunt.com/v2/oauth/applications).
 We will be using the developer token via [OAuth Client Only Authentication](https://api.producthunt.com/v2/docs/oauth_client_only_authentication/oauth_token_ask_for_client_level_token). 
 Copy `config.conf.example` as `config.conf` and insert your developer token.
 
-Run `dataset/populate.py` to start the data collection process. By default, it will  
+At the time of writing, Product Hunt has 206,246 posts and 252 topics.
+
+In order to process tens of thousands of records without occupying too much memory or installing an RDBMS database, we 
+need to store records in separate files identified with their unique IDs. This also allows keeping track of previously 
+fetched posts and topics.
+
+The `dataset` folder has the following structure:
+
+- `dataset`
+  - `posts`
+    - `286331.json`
+    - `286330.json`
+    - `286329.json`
+    - `286328.json`
+    - ...
+  - `topics`
+    - `252.json`
+    - `251.json`
+    - `250.json`
+    - `249.json`
+    - ...
+  - `stats.json`
+    
+Structure of posts:
+
+```json
+{
+  "id": "123456",
+  "name": "Product name",
+  "description": "Product description",
+  "tagline": "Product tagline",
+  "topics": [
+    {
+      "id": "1234",
+      "name": "Topic name",
+      "description": "Topic description"
+    }
+  ]
+}
+```
+
+Structure of topics:
+
+```json
+{
+  "id": "1234",
+  "name": "Topic name",
+  "description": "Topic description"
+}
+```
+
+Run `dataset/populate.py` to start the data collection process.
+
+This script will attempt to download all posts and topics.
+
+Due to a limitation in their GraphQL API implementation, it's not easy to offset results by a particular post ID. This
+means that we have to start from the first post and work our way to the end.
+
+If you hit the API rate limit, the script automatically retries every minute and continues where it left off. It 
+keeps track of the last scanned results page and post ID in `dataset/stats.json`.
+
 
 ## About the author
 
