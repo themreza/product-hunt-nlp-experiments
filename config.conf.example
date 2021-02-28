@@ -1,0 +1,3 @@
+# Copy and rename this file as config.conf
+[API]
+developer_token = INSERT_YOUR_DEVELOPER_TOKEN_HERE
