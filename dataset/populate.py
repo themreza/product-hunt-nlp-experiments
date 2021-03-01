@@ -18,9 +18,12 @@ Topics:
 import os
 import json
 import time
+import logging
+
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
 
 from helpers.config import Config
-from helpers.api import Api
+from helpers.api import Api, ApiError, ApiRateLimitError
 
 
 class Populate():
@@ -105,7 +108,7 @@ class Populate():
         query {
           posts(order: NEWEST, last: 20%s) {
             pageInfo {
-              hasNextPage
+              hasPreviousPage
             },
             edges {
               node {
@@ -134,7 +137,9 @@ class Populate():
         posts = self.fetch_posts()
         captured_cursor = False
         if 'data' not in posts:
-            raise KeyError("API response is missing the data field")
+            raise ApiError("API response is missing the data field")
+        if 'errors' in posts:
+            raise ApiRateLimitError(posts['errors'])
         # posts are ordered newest to orders, so we need the first cursor
         for post in posts['data']['posts']['edges']:
             if not captured_cursor:
@@ -143,9 +148,17 @@ class Populate():
                 captured_cursor = True
             self.save_record(post['node'])
         self.save_stats()
-        return posts['data']['posts']['pageInfo']['hasNextPage']
+        return posts['data']['posts']['pageInfo']['hasPreviousPage']
 
 
 populate = Populate()
-while populate.next_page():
-    time.sleep(3)
+
+while True:
+    try:
+        while populate.next_page():
+            logging.info("Page processed! Latest post ID: %s" % populate.latest_post_id)
+            time.sleep(3)
+        break
+    except ApiRateLimitError:
+        logging.error("API rate limit exceeded - trying again in 1 minute")
+        time.sleep(60)

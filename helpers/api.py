@@ -15,3 +15,11 @@ class Api:
             headers={"Authorization": "Bearer %s" % self.developer_token}
         )
         return response.json()
+
+
+class ApiError(Exception):
+    pass
+
+
+class ApiRateLimitError(Exception):
+    pass
