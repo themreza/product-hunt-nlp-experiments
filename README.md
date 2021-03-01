@@ -64,8 +64,7 @@ Structure of posts:
   "topics": [
     {
       "id": "1234",
-      "name": "Topic name",
-      "description": "Topic description"
+      "name": "Topic name"
     }
   ]
 }
@@ -76,8 +75,7 @@ Structure of topics:
 ```json
 {
   "id": "1234",
-  "name": "Topic name",
-  "description": "Topic description"
+  "name": "Topic name"
 }
 ```
 
@@ -89,7 +87,7 @@ Due to a limitation in their GraphQL API implementation, it's not easy to offset
 means that we have to start from the first post and work our way to the end.
 
 If you hit the API rate limit, the script automatically retries every minute and continues where it left off. It 
-keeps track of the last scanned results page and post ID in `dataset/stats.json`.
+keeps track of the last scanned post cursor and ID in `dataset/stats.json`.
 
 
 ## About the author
