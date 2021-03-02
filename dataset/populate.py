@@ -19,11 +19,18 @@ import os
 import json
 import time
 import logging
+import sys
+import inspect
 
-logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
+# TODO: Fix this - https://gist.github.com/JungeAlexander/6ce0a5213f3af56d7369
+current_dir = os.path.dirname(os.path.abspath(inspect.getfile(inspect.currentframe())))
+parent_dir = os.path.dirname(current_dir)
+sys.path.insert(0, parent_dir)
 
 from helpers.config import Config
 from helpers.api import Api, ApiError, ApiRateLimitError
+
+logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
 
 
 class Populate():
@@ -36,6 +43,9 @@ class Populate():
         self.config = Config().load()
         self.api = Api(self.config.get('API', 'developer_token'))
         self.load_stats()
+
+    def reload_token(self, api_token):
+        self.api = Api(api_token)
 
     @staticmethod
     def get_posts_directory_path():
@@ -100,7 +110,7 @@ class Populate():
             topic_file_path = os.path.join(dataset_directory_path, "topics/%s.json" % topic_data['id'])
             if not os.path.isfile(topic_file_path):
                 with open(topic_file_path, "w+") as tf:
-                    json.dump(post_data, tf)
+                    json.dump(topic_data, tf)
 
     def fetch_posts(self):
         cursor = ', before: "%s"' % self.latest_post_cursor if self.latest_post_cursor else ""
@@ -159,6 +169,6 @@ while True:
             logging.info("Page processed! Latest post ID: %s" % populate.latest_post_id)
             time.sleep(3)
         break
-    except ApiRateLimitError:
-        logging.error("API rate limit exceeded - trying again in 1 minute")
+    except ApiRateLimitError as e:
+        logging.error("API rate limit exceeded - trying again in 1 minute - %s" % e)
         time.sleep(60)

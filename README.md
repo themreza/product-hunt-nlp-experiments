@@ -5,12 +5,12 @@ Natural Language Processing (NLP) experiments based on data from Product Hunt.
 
 **Development status**: Data collection
 
-## Experiments
+## Experiment Models
 
-- A model that suggests topics based on a description of the product
-- A model that describes a product based on given topics
-- A model that generates a tagline based on the product description
-- A model that names a product based on its description
+1. A model that suggests topics based on a description of the product
+2. A model that describes a product based on given topics
+3. A model that generates a tagline based on the product description
+4. A model that names a product based on its description
 
 ## Data collection
 
@@ -89,6 +89,27 @@ means that we have to start from the first post and work our way to the end.
 If you hit the API rate limit, the script automatically retries every minute and continues where it left off. It 
 keeps track of the last scanned post cursor and ID in `dataset/stats.json`.
 
+## Data cleaning
+
+The raw data contains some anomalies that need to be cleaned out.
+
+Posts that match any of the following criteria need to be deleted:
+* Non-English content (NLP language detection via [whatthelang](https://github.com/indix/whatthelang))
+* Exact same name, description, and tagline
+* Description and tagline only contain link 
+
+Furthermore, there are posts with just enough data to only train a single model.
+
+To know which posts can train which models, we need to filter out posts that have these data combinations:
+
+* All models
+  * Valid name, description, tagline, and topics
+* Model 1 and 2 only
+  * Valid description and topics
+* Model 3
+  * Valid description and tagline
+* Model 4
+  * Valid name and description
 
 ## About the author
 
