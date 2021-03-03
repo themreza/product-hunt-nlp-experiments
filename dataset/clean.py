@@ -46,7 +46,7 @@ class Clean:
             os.remove(file_path)
             logging.info('Deleted posts/%s.json' % post_id)
 
-    def find_non_english_posts(self):
+    def non_english_posts(self):
         post_file_paths = self.get_post_file_paths()
         for post_file_path in post_file_paths:
             with open(post_file_path, "r") as post_file:
@@ -66,6 +66,55 @@ class Clean:
                     # Remove the post from the dataset
                     self.delete_post(post['id'])
 
+    def homogeneous_posts(self):
+        post_file_paths = self.get_post_file_paths()
+        for post_file_path in post_file_paths:
+            with open(post_file_path, "r") as post_file:
+                post = json.load(post_file)
+                post_content = []
+                if post['name']:
+                    post_content.append(post['name'])
+                if post['description']:
+                    post_content.append(post['description'])
+                if post['tagline']:
+                    post_content.append(post['tagline'])
+                if len(list(set(post_content))) <= 1:
+                    # A valid post must have at least 2 out of 3 unique and valid fields
+                    self.append_to_file('homogeneous_posts.json', {
+                        'id': post['id'],
+                        'name': post['name'],
+                        'description': post['description'],
+                        'tagline': post['tagline']
+                    })
+                    # Remove the post from the dataset
+                    self.delete_post(post['id'])
+
+    @staticmethod
+    def get(dictionary, key, default=None):
+        if key not in dictionary or not dictionary[key]:
+            return default
+        return dictionary[key]
+
+    @staticmethod
+    def tuple_in_string(tuple, string):
+        return any(s in string for s in tuple)
+
+    def link_only_posts(self):
+        # TODO: WIP
+        post_file_paths = self.get_post_file_paths()
+        matched = []
+        for post_file_path in post_file_paths:
+            with open(post_file_path, "r") as post_file:
+                post = json.load(post_file)
+                invalid_phrases = ("http", "www")
+                if self.tuple_in_string(invalid_phrases, self.get(post, 'name', '')) \
+                        or self.tuple_in_string(invalid_phrases, self.get(post, 'description', '')) \
+                        or self.tuple_in_string(invalid_phrases, self.get(post, 'tagline', '')):
+                    matched.append(post)
+        print(len(matched))
+
 
 clean = Clean()
-clean.find_non_english_posts()
+# clean.non_english_posts()
+# clean.homogeneous_posts()
+clean.link_only_posts()

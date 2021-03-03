@@ -112,8 +112,11 @@ Posts that match any of the following criteria need to be deleted:
   - If none of the fields are in English, the post is flagged
   - There are false-positives due to low word count
   - About 1.16% of the data (2400 out of 206000 posts) has non-English content
-  - ![](assets/non-english-posts.gif)
-* Exact same name, description, and tagline
+  - ![](assets/non-english-data.png)
+* Homogeneous data
+  - If there is just one unique piece of data among the name, description, and tagline fields
+  - About 0.17% of the data (350 out of 206000 posts) is homogeneous
+  - ![](assets/homogeneous-data.png)
 * Description and tagline only contain links 
 
 Furthermore, there are posts with just enough data to only train a single model.
