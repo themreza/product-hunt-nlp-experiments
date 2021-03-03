@@ -14,7 +14,7 @@ Natural Language Processing (NLP) experiments based on data from Product Hunt.
 5. A model that comes up with a tagline based on the name of a product (`models/name_to_tagline`)
 6. A model that suggests a product name based on a given tagline (`models/tagline_to_name`)
 
-##Dependencies
+## Dependencies
 
 Install all the required modules:
 
