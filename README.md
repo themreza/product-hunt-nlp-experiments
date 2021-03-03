@@ -3,14 +3,25 @@ Natural Language Processing (NLP) experiments based on data from Product Hunt.
 
 ![Product Hunt NLP Experiments](assets/logo-128.png)
 
-**Development status**: Data collection
+**Development status**: Data cleaning
 
-## Experiment Models
+## Experiment models
 
-1. A model that suggests topics based on a description of the product
-2. A model that describes a product based on given topics
-3. A model that generates a tagline based on the product description
-4. A model that names a product based on its description
+1. A model that suggests topics based on a description of the product (`models/description_to_topics`)
+2. A model that describes a product based on given topics (`models/topics_to_description`)
+3. A model that generates a tagline based on the product description (`models/description_to_tagline`)
+4. A model that names a product based on its description (`models/description_to_name`)
+5. A model that comes up with a tagline based on the name of a product (`models/name_to_tagline`)
+6. A model that suggests a product name based on a given tagline (`models/tagline_to_name`)
+
+##Dependencies
+
+Install all the required modules:
+
+```bash
+pip install -r requirements.txt
+``` 
+
 
 ## Data collection
 
@@ -33,7 +44,7 @@ Copy `config.conf.example` as `config.conf` and insert your developer token.
 At the time of writing, Product Hunt has 206,246 posts and 252 topics.
 
 In order to process tens of thousands of records without occupying too much memory or installing an RDBMS database, we 
-need to store records in separate files identified with their unique IDs. This also allows keeping track of previously 
+need to store records in separate files identified by their unique IDs. This also allows keeping track of previously 
 fetched posts and topics.
 
 The `dataset` folder has the following structure:
@@ -94,22 +105,31 @@ keeps track of the last scanned post cursor and ID in `dataset/stats.json`.
 The raw data contains some anomalies that need to be cleaned out.
 
 Posts that match any of the following criteria need to be deleted:
-* Non-English content (NLP language detection via [whatthelang](https://github.com/indix/whatthelang))
+* Non-English content
+  - Using NLP libraries [language-detector](https://github.com/DanielJDufour/language-detector) and 
+  [langdetect](https://github.com/Mimino666/langdetect)
+  - Description and taglines are used to detect the language
+  - If none of the fields are in English, the post is flagged
+  - There are false-positives due to low word count
+  - About 1.16% of the data (2400 out of 206000 posts) has non-English content
+  - ![](assets/non-english-posts.gif)
 * Exact same name, description, and tagline
-* Description and tagline only contain link 
+* Description and tagline only contain links 
 
 Furthermore, there are posts with just enough data to only train a single model.
 
-To know which posts can train which models, we need to filter out posts that have these data combinations:
+To know which posts can train which models, we need to group the posts according to these combinations:
 
 * All models
   * Valid name, description, tagline, and topics
-* Model 1 and 2 only
+* Models 1 and 2 only
   * Valid description and topics
 * Model 3
   * Valid description and tagline
 * Model 4
   * Valid name and description
+* Models 5 and 6 only
+  * Valid name and tagline
 
 ## About the author
 

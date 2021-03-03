@@ -33,7 +33,7 @@ from helpers.api import Api, ApiError, ApiRateLimitError
 logging.basicConfig(format='%(asctime)s %(message)s', datefmt='%m/%d/%Y %I:%M:%S')
 
 
-class Populate():
+class Populate:
     config = None
     api = None
     latest_post_id = None
@@ -46,12 +46,6 @@ class Populate():
 
     def reload_token(self, api_token):
         self.api = Api(api_token)
-
-    @staticmethod
-    def get_posts_directory_path():
-        dataset_directory_path = os.path.dirname(__file__)
-        posts_directory_path = os.path.join(dataset_directory_path, 'posts')
-        return posts_directory_path
 
     @staticmethod
     def open_stats_file(mode="read"):

@@ -1,0 +1,3 @@
+six
+langdetect
+language-detector
