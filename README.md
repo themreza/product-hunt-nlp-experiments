@@ -125,9 +125,13 @@ After the initial cleaning, we now need to the sanitize post data to:
   - About 0.53% (1100 out of 206000) of all post names were cleared as a result
 * Remove unicode characters
 
-Furthermore, there are posts with just enough data to only train a single model.
+Run `dataset/clean.py` to execute the data cleaning process.
 
-To know which posts can train which models, we need to group the posts according to these combinations:
+## Data classification
+
+Some posts just have enough data to train a single model.
+
+To know which posts can train which models, we need to classify the posts according to these combinations:
 
 * All models
   * Valid name, description, tagline, and topics
@@ -139,6 +143,37 @@ To know which posts can train which models, we need to group the posts according
   * Valid name and description
 * Models 5 and 6 only
   * Valid name and tagline
+
+Posts matching each combination will be grouped together within a dedicated CSV dataframe the `dataset/dataframes` 
+directory.
+
+Run `dataset/dataframes.py` to perform data classification.
+
+## Interesting statistics
+
+### Top 20 Product Hunt topics:
+
+|Topic                  |Frequency|
+|-----------------------|---------|
+|Tech                   |34449    |
+|Productivity           |29277    |
+|Developer Tools        |15137    |
+|Marketing              |14051    |
+|iPhone                 |12235    |
+|Web App                |11935    |
+|Android                |10329    |
+|User Experience        |9965     |
+|Design Tools           |7377     |
+|Artificial Intelligence|6155     |
+|Games                  |4833     |
+|Health and Fitness     |4304     |
+|Education              |4226     |
+|Social Media Tools     |4128     |
+|SaaS                   |3642     |
+|Crypto                 |3079     |
+|Analytics              |3028     |
+|Fintech                |3027     |
+
 
 ## About the author
 
