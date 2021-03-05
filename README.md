@@ -117,7 +117,13 @@ Posts that match any of the following criteria need to be deleted:
   - If there is just one unique piece of data among the name, description, and tagline fields
   - About 0.17% of the data (350 out of 206000 posts) is homogeneous
   - ![](assets/homogeneous-data.png)
-* Description and tagline only contain links 
+
+After the initial cleaning, we now need to the sanitize post data to:
+
+* Remove links and web addresses
+  - Using a [regular expression](https://www.regextester.com/93652)
+  - About 0.53% (1100 out of 206000) of all post names were cleared as a result
+* Remove unicode characters
 
 Furthermore, there are posts with just enough data to only train a single model.
 

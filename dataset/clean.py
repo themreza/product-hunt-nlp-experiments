@@ -2,12 +2,15 @@ import os
 import glob
 import json
 import logging
+import re
 
 from langdetect import detect_langs, lang_detect_exception
 from language_detector import detect_language
 
 
 class Clean:
+    link_regex = r'^(http:\/\/www\.|https:\/\/www\.|http:\/\/|https:\/\/)?[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(:[0-9]{1,5})?(\/.*)?$'
+
     @staticmethod
     def get_post_file_paths():
         dataset_directory_path = os.path.dirname(__file__)
@@ -66,6 +69,16 @@ class Clean:
                     # Remove the post from the dataset
                     self.delete_post(post['id'])
 
+    def delete_invalid_post_files(self):
+        post_file_paths = self.get_post_file_paths()
+        for post_file_path in post_file_paths:
+            with open(post_file_path, "r") as post_file:
+                try:
+                    json.load(post_file)
+                except json.decoder.JSONDecodeError:
+                    print("Deleting invalid JSON file %s" % post_file_path)
+                    os.remove(post_file_path)
+
     def homogeneous_posts(self):
         post_file_paths = self.get_post_file_paths()
         for post_file_path in post_file_paths:
@@ -99,22 +112,53 @@ class Clean:
     def tuple_in_string(tuple, string):
         return any(s in string for s in tuple)
 
-    def link_only_posts(self):
-        # TODO: WIP
+    @staticmethod
+    def remove_unicode_characters(string):
+        return string.encode('ascii', 'ignore').decode()
+
+    def remove_links(self, string):
+        return re.sub(self.link_regex, '', string)
+
+    def sanitize_field(self, dictionary, key):
+        if self.get(dictionary, key):
+            sanitized_tokens = []
+            # Tokenize strings to process each phrase
+            for token in dictionary[key].split():
+                token = self.remove_unicode_characters(token)
+                token = self.remove_links(token)
+                sanitized_tokens.append(token)
+            # Put the array of tokens back together
+            dictionary[key] = ' '.join(sanitized_tokens)
+            # Remove duplicate whitespaces and trim the ends
+            dictionary[key] = re.sub(' +', ' ', dictionary[key]).strip()
+
+    @staticmethod
+    def save_post(post_id, data):
+        dataset_directory_path = os.path.dirname(__file__)
+        post_file_path = os.path.join(dataset_directory_path, 'posts/%s.json' % post_id)
+        if os.path.exists(post_file_path):
+            with open(post_file_path, 'w') as post_file:
+                json.dump(data, post_file)
+
+    def sanitize_posts(self):
         post_file_paths = self.get_post_file_paths()
-        matched = []
         for post_file_path in post_file_paths:
             with open(post_file_path, "r") as post_file:
                 post = json.load(post_file)
-                invalid_phrases = ("http", "www")
-                if self.tuple_in_string(invalid_phrases, self.get(post, 'name', '')) \
-                        or self.tuple_in_string(invalid_phrases, self.get(post, 'description', '')) \
-                        or self.tuple_in_string(invalid_phrases, self.get(post, 'tagline', '')):
-                    matched.append(post)
-        print(len(matched))
+                self.sanitize_field(post, 'name')
+                self.sanitize_field(post, 'description')
+                self.sanitize_field(post, 'tagline')
+                self.save_post(post['id'], post)
 
 
 clean = Clean()
+
+clean.delete_invalid_post_files()
+
+# Takes a while to finish
 # clean.non_english_posts()
-# clean.homogeneous_posts()
-clean.link_only_posts()
+
+clean.sanitize_posts()
+
+# We run this last to take into account posts that had fields cleared during the sanitation
+clean.homogeneous_posts()
